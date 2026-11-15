@@ -1,0 +1,134 @@
+/* 主题变量与全局基础样式：水墨 + 宣纸 + 朱砂 */
+:root {
+  --ink-900: #17140f;
+  --ink-700: #2f2a23;
+  --ink-500: #554d41;
+  --ink-400: #6f6656;
+  --ink-300: #8f8574;
+  --ink-150: #b9ae9b;
+  --ink-100: #d3c8b4;
+
+  --paper-50: #fdfaf3;
+  --paper-100: #f7f1e4;
+  --paper-200: #eee5d4;
+  --paper-300: #dfd3bd;
+
+  --cinnabar: #b03a2e;
+  --cinnabar-dark: #8c2c22;
+  --cinnabar-soft: rgba(176, 58, 46, 0.12);
+  --celadon: #4a6b5a;
+  --celadon-soft: rgba(74, 107, 90, 0.12);
+
+  --radius-lg: 16px;
+  --radius-md: 10px;
+  --radius-sm: 7px;
+
+  --shadow-card:
+    0 22px 48px -30px rgba(38, 30, 20, 0.55),
+    0 1px 0 rgba(255, 255, 255, 0.75) inset;
+  --shadow-float: 0 12px 26px -18px rgba(38, 30, 20, 0.5);
+
+  --font-serif: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "STSong", SimSun,
+    "PingFang SC", serif;
+  --font-sans: "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", system-ui, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-serif);
+  color: var(--ink-700);
+  background:
+    radial-gradient(120% 90% at 15% 0%, #fdfbf5 0%, #f6f0e3 45%, #ebe1cf 100%),
+    var(--paper-100);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3,
+p,
+figure {
+  margin: 0;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+a {
+  color: var(--cinnabar);
+}
+
+::selection {
+  background: var(--cinnabar-soft);
+}
+
+/* 场景背景：远山、雪坡、落雪都在这里，纯 SVG + CSS 绘制 */
+.scene {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.scene svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.snowflake {
+  position: absolute;
+  top: -12px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.7);
+  animation-name: snowfall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+@keyframes snowfall {
+  from {
+    transform: translate3d(0, -10vh, 0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 0.9;
+  }
+  to {
+    transform: translate3d(4vw, 108vh, 0);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .snowflake {
+    animation: none;
+    opacity: 0.35;
+  }
+}
