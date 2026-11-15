@@ -1,0 +1,9 @@
+# 统一按 LF 存储：容器内是 Linux 环境，避免 CRLF 影响脚本与构建
+* text=auto eol=lf
+
+# 二进制文件不做换行符转换
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.ico binary
+*.svg text
