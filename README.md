@@ -76,7 +76,7 @@ docker compose logs --tail=100
 
 ## 与后端联调
 
-后端仓库：<https://github.com/你的GitHub用户名/intern-day-2-backend>（创建仓库后替换此处地址）
+后端仓库：<https://github.com/fan-beijing/intern-day-2-backend>
 
 两个仓库是**两个独立的 Compose 项目**，容器之间没有服务发现。联调方式是浏览器直连宿主机映射的端口：
 
