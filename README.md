@@ -147,6 +147,9 @@ pnpm build        # tsc -b && vite build（含类型检查）
 仓库带 `.devcontainer/`（Node 22 + git + pnpm）。在 VS Code 里打开本仓库，执行 `Dev Containers: Reopen in Container`，
 容器会根据 `devcontainer.json` 自动执行 `pnpm install --frozen-lockfile`，之后在容器终端里 `pnpm dev` 即可。
 
+开发容器的命令级实测记录（`@devcontainers/cli` 构建、容器内工具版本、`pnpm install / lint / build`，
+含本机代理拦截 npm 官方源时的绕行说明）见 [`docs/devcontainer-check.md`](docs/devcontainer-check.md)。
+
 ## 自测记录
 
 在开发容器与 Compose 两种启动方式下都用浏览器实际操作过，结果如下。
