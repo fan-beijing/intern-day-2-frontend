@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ApiError, api } from '../api/client'
 import type { Entry, Summary } from '../api/types'
 import { useAuth } from '../auth/useAuth'
+import AgentPanel from '../agent/AgentPanel'
 import EntryForm from '../components/EntryForm'
 import EntryList from '../components/EntryList'
 import SummaryCards from '../components/SummaryCards'
@@ -161,6 +162,8 @@ export default function LedgerPage() {
             />
           </section>
         </div>
+
+        <AgentPanel />
       </main>
 
       {toast ? <Toast key={toast.id} text={toast.text} tone={toast.tone} /> : null}
