@@ -1,8 +1,11 @@
 name: intern-day-2-frontend
 
 services:
+  # 浏览器访问的 Vite 开发服务器（只负责页面与 HMR，不具备 CopilotKit Runtime 能力）
   web:
-    build: .
+    build:
+      context: .
+      target: web
     image: intern-day-2-frontend:local
     container_name: intern-day-2-frontend
     ports:
@@ -10,4 +13,43 @@ services:
     environment:
       # 浏览器直连宿主机映射的后端端口，不依赖 Compose 服务发现
       VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:8000}
+      # Vite 把 /api/copilotkit 代理到 Runtime：容器内用服务名 runtime
+      RUNTIME_URL: ${RUNTIME_URL:-http://runtime:4000}
+    depends_on:
+      runtime:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # CopilotKit Runtime：把浏览器发来的 AG-UI 请求转给 Python Agent。
+  # 它不持有任何用户凭证，Authorization 头按请求原样透传。
+  runtime:
+    build:
+      context: .
+      target: runtime
+    image: intern-day-2-frontend-runtime:local
+    container_name: intern-day-2-frontend-runtime
+    ports:
+      # 暴露给宿主机排查用；浏览器实际走 web 的同源代理，不直接访问它
+      - "4000:4000"
+    environment:
+      RUNTIME_PORT: "4000"
+      AGENT_ID: ${AGENT_ID:-xuelu-ledger-assistant}
+      # 两个 Compose 项目各有命名空间，不能假定对方服务名可解析：
+      # 默认经宿主机映射端口访问后端，跨项目也能用。
+      BACKEND_AGENT_URL: ${BACKEND_AGENT_URL:-http://host.docker.internal:8000/agent}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:5173}
+      COPILOTKIT_TELEMETRY_DISABLED: "true"
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:4000/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+      interval: 10s
+      timeout: 3s
+      start_period: 5s
+      retries: 5
+    extra_hosts:
+      # 容器内 host.docker.internal 指向宿主机，用来访问另一个 Compose 项目的 8000
+      - "host.docker.internal:host-gateway"
     restart: unless-stopped
