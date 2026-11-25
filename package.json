@@ -9,7 +9,8 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
-    "runtime": "node server/runtime.mjs"
+    "runtime": "node server/runtime.mjs",
+    "dev:runtime": "node server/runtime.mjs"
   },
   "pnpm": {
     "ignoredBuiltDependencies": [

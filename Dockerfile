@@ -8,7 +8,8 @@ WORKDIR /app
 
 # 依赖层单独缓存：锁文件不变就不重装
 # pnpm-workspace.yaml 参与依赖解析（忽略了 @scarf/scarf 的构建脚本），必须一起复制
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+# .npmrc 指定镜像源：本机/容器访问 npm 官方源会被代理拦截，必须一起复制
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
 RUN pnpm install --frozen-lockfile
 
 # ── 阶段一：Vite 开发服务器（浏览器访问的页面）────────────────────────────
