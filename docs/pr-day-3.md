@@ -138,9 +138,12 @@ cd intern-day-2-frontend && docker compose up -d --build
 
 在后端仓库（两个仓库不重复维护）：
 
-- 原理说明：`docs/day-3-agent-learning.md`
-- 交互图：`docs/diagrams/day-3-agent-interaction.png`
-- 复盘：`docs/day-3-retrospective.md`
+- 原理说明：[`docs/day-3-agent-learning.md`](https://github.com/fan-beijing/intern-day-2-backend/blob/feat/agent-chat/docs/day-3-agent-learning.md)
+- 交互图：[`docs/diagrams/day-3-agent-interaction.png`](https://github.com/fan-beijing/intern-day-2-backend/blob/feat/agent-chat/docs/diagrams/day-3-agent-interaction.png)
+- 复盘：[`docs/day-3-retrospective.md`](https://github.com/fan-beijing/intern-day-2-backend/blob/feat/agent-chat/docs/day-3-retrospective.md)
+- 演示脚本：[`docs/day-3-demo-script.md`](https://github.com/fan-beijing/intern-day-2-backend/blob/feat/agent-chat/docs/day-3-demo-script.md)
+
+![第三天交互图](https://github.com/fan-beijing/intern-day-2-backend/raw/feat/agent-chat/docs/diagrams/day-3-agent-interaction.png)
 
 ## 设计取舍与已知限制
 
