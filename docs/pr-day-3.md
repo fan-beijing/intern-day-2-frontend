@@ -138,16 +138,29 @@ cd intern-day-2-frontend && docker compose up -d --build
 - 交互图：`docs/diagrams/day-3-agent-interaction.png`
 - 复盘：`docs/day-3-retrospective.md`
 
-## 已知问题与未完成项
+## 设计取舍与已知限制
 
-1. **真实模型已接通**：后端用阿里云百炼 `deepseek-v4.1-flash`，本仓库无需改动。
-2. **`host.docker.internal` 不可靠**：本机 Windows + Docker Desktop 环境下，
-   容器经该地址访问宿主机时 `Authorization` 头会丢失（实测同一令牌走它 401、
-   走 Docker 网关 200）。因此改用共享网络 + 服务名 `api:8000`。
-3. **容器内依赖走镜像源**：本机访问 npm 官方源被代理拦截，`.npmrc` 指向 npmmirror；
-   `--frozen-lockfile` 的完整性校验仍生效。
-4. **前端用 Vite 开发服务器演示**：不是生产构建产物，容器里跑的是 `pnpm dev`。
-5. **刷新丢历史**：会话历史只在浏览器内存中，README 已写清。
+> 本节说明**有意为之的取舍**和**任务范围外**的部分，不是遗留缺陷。
+> 任务说明第 50 行「不要求多 Agent、RAG、向量数据库、MCP、复杂审批流或生产部署」，
+> 第 150 行「可以只保存当前会话，今天不要求数据库持久化」。
+
+### 有意为之的取舍
+
+1. **刷新丢历史**：会话历史只在浏览器侧，后端不落库。任务说明允许（第 150 行），
+   README 已写清行为。
+2. **Vite 开发服务器演示**：容器里跑 `pnpm dev`，不是生产构建产物。
+3. **空输入与重复发送**：空内容时发送按钮禁用；发送中锁定输入，避免重复提交。
+
+### 任务范围外（明确不做）
+
+多 Agent、RAG、向量库、MCP、审批流、生产部署——任务说明第 50 行不要求。
+
+### 环境相关的说明（已解决，留档备查）
+
+- **`host.docker.internal` 丢失 Authorization**：本机 Windows + Docker Desktop 下，
+  容器经该地址访问宿主机时 `Authorization` 头被代理改写丢失（实测同一令牌走它 401、
+  走 Docker 网关 200）。**已改用共享网络 + 服务名 `api:8000`**，README 写明创建步骤。
+- **容器内 npm 源被拦截**：`.npmrc` 指向 npmmirror，`--frozen-lockfile` 仍生效。
 
 ## 敏感信息检查
 
