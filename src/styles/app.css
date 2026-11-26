@@ -628,3 +628,36 @@
     gap: 10px;
   }
 }
+
+/* ---------- 记账助手（CopilotKit） ---------- */
+.agent-panel {
+  margin-top: 22px;
+}
+
+.agent-panel-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.agent-error {
+  margin: 10px 0 0;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--cinnabar-soft);
+  color: var(--cinnabar-dark);
+  font-size: 13px;
+}
+
+.agent-chat {
+  height: 520px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(120, 104, 80, 0.18);
+  overflow: hidden;
+}
+
+.agent-chat > * {
+  height: 100%;
+}

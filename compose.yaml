@@ -1,8 +1,21 @@
 name: intern-day-2-frontend
 
+# 两个仓库是两个独立的 Compose 项目，各自有默认网络、互不可见。
+# Runtime 要访问 Python 的 /agent，这里用「显式共享网络」而不是 host.docker.internal：
+#   docker network create intern-day-shared   # 只需执行一次，README 里写明了
+# 共享网络由外部创建（external: true），两个项目都加入它，
+# 于是 runtime 可以用服务名/别名 `api` 直接访问后端容器，不依赖宿主机端口映射与代理。
+#
+# 为什么不用 host.docker.internal：在 Windows + Docker Desktop 上，
+# 经它转发的请求会被本机代理改写，实测会出现 Authorization 头丢失（对照实验：
+# 同一个合法令牌，走 host.docker.internal 得到 401，走 Docker 网关 172.19.0.1 得到 200）。
+
 services:
+  # 浏览器访问的 Vite 开发服务器（只负责页面与 HMR，不具备 CopilotKit Runtime 能力）
   web:
-    build: .
+    build:
+      context: .
+      target: web
     image: intern-day-2-frontend:local
     container_name: intern-day-2-frontend
     ports:
@@ -10,4 +23,48 @@ services:
     environment:
       # 浏览器直连宿主机映射的后端端口，不依赖 Compose 服务发现
       VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:8000}
+      # Vite 把 /api/copilotkit 代理到 Runtime：同一个 Compose 项目内可用服务名
+      RUNTIME_URL: ${RUNTIME_URL:-http://runtime:4000}
+    depends_on:
+      runtime:
+        condition: service_healthy
     restart: unless-stopped
+
+  # CopilotKit Runtime：把浏览器发来的 AG-UI 请求转给 Python Agent。
+  # 它不持有任何用户凭证，Authorization 头按请求原样透传。
+  runtime:
+    build:
+      context: .
+      target: runtime
+    image: intern-day-2-frontend-runtime:local
+    container_name: intern-day-2-frontend-runtime
+    ports:
+      # 暴露给宿主机排查用；浏览器实际走 web 的同源代理，不直接访问它
+      - "4000:4000"
+    environment:
+      RUNTIME_PORT: "4000"
+      AGENT_ID: ${AGENT_ID:-xuelu-ledger-assistant}
+      # 共享网络内按服务名解析后端容器（后端 compose 里给它加了别名 api）
+      BACKEND_AGENT_URL: ${BACKEND_AGENT_URL:-http://api:8000/agent}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:5173}
+      COPILOTKIT_TELEMETRY_DISABLED: "true"
+    networks:
+      - default
+      - shared
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:4000/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+      interval: 10s
+      timeout: 3s
+      start_period: 5s
+      retries: 5
+    restart: unless-stopped
+
+networks:
+  # 由 README 的 `docker network create intern-day-shared` 预先创建
+  shared:
+    name: intern-day-shared
+    external: true

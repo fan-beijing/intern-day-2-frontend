@@ -133,6 +133,77 @@ cd intern-day-2-frontend && docker compose up --build -d
 
 `.env.example` 只有占位值，真实的 `.env` 不进仓库。Vite 只能在启动/构建时读取该变量，改动后需要重启容器。
 
+## 第三天：CopilotKit 聊天面板 + Runtime 服务
+
+登录后的记账页下方多了一个「雪庐小账房」面板，用 CopilotKit 接后端的 AG-UI Agent。
+
+### 三个服务，三个地址
+
+| 服务 | 位置 | 浏览器访问 | 容器内 | 作用 |
+| --- | --- | --- | --- | --- |
+| web（Vite） | 本仓库 `Dockerfile` | `http://localhost:5173` | `web:5173` | 页面；把 `/api/copilotkit` 代理到 Runtime |
+| runtime（Express） | 本仓库 `server/` | 经 5173 代理；也可直连 `http://localhost:4000` | `runtime:4000` | 把 AG-UI 请求转给 Python `/agent` |
+| api（FastAPI） | 另一个仓库 | `http://localhost:8000` | `api:8000` | Agent 与账目接口 |
+
+web 与 runtime 在同一个 Compose 项目里，可以用服务名互访；**api 在另一个 Compose 项目**，
+两个项目各有默认网络、互不可见，所以这里用**显式共享网络**把它们接起来：
+
+```bash
+# 只需执行一次：创建共享网络（两个仓库的 compose 都以 external 方式引用它）
+docker network create intern-day-shared
+```
+
+```bash
+# 后端仓库
+cd intern-day-2-backend && docker compose up -d --build
+
+# 前端仓库
+cd intern-day-2-frontend && docker compose up -d --build
+```
+
+共享网络里后端容器带别名 `api`，因此 runtime 用 `http://api:8000/agent` 直接访问，
+中文服务名可解析、不经过宿主机端口。
+
+> **为什么不用 `host.docker.internal`**：本机 Win + Docker Desktop 环境下，
+> 经它转发的请求会被本机代理改写，实测会出现 **Authorization 头丢失**：
+> 同一个合法令牌，走 `host.docker.internal:8000` 得到 `401`，
+> 走 Docker 网关 `172.19.0.1:8000` 得到 `200`，两者响应体完全不同。
+> 换成共享网络后 `GET /auth/me` 与 `POST /agent` 均恢复正常。
+> 这是今天排查最久的一个问题，定位方法是「同一令牌、两种网络路径，对照响应」。
+
+Vite 本身不是 Runtime：`vite.config.ts` 里只有 `proxy`，把请求转给真正的 Runtime 服务。
+
+### 认证怎么传
+
+- 浏览器：`<CopilotKitProvider headers={...}>` 每次请求现取 localStorage 里的令牌，加 `Authorization: Bearer ...`。
+- Runtime：按**该请求**的 Authorization 建 `HttpAgent`，原样转发；它不持有、也不缓存任何用户凭证。
+- 后端：校验令牌，失败 401。Runtime 那层先挡一次只是减少无意义的连接，真正的信任边界在 Python。
+- 模型密钥完全不经过前端与 Runtime。
+
+### 环境变量
+
+| 变量 | 服务 | 说明 | 默认 |
+| --- | --- | --- | --- |
+| `VITE_API_BASE_URL` | web | 浏览器访问后端地址 | `http://localhost:8000` |
+| `RUNTIME_URL` | web | Vite 代理目标 | `http://localhost:4000`（容器内 `http://runtime:4000`） |
+| `BACKEND_AGENT_URL` | runtime | Python AG-UI 地址 | `http://host.docker.internal:8000/agent` |
+| `ALLOWED_ORIGINS` | runtime | CORS 白名单 | `http://localhost:5173` |
+| `AGENT_ID` | runtime | 注册给前端的 Agent 标识，必须与后端一致 | `xuelu-ledger-assistant` |
+
+### 会话行为
+
+- 历史消息由浏览器持有，后端不落库；**刷新页面会清空对话**。
+- 「新建对话」按钮换一个 `threadId`，等于开一段新会话，旧会话不再显示。
+- 退出登录时组件卸载、令牌清除；旧令牌请求 `/agent` 返回 401。
+
+### 版本
+
+CopilotKit `@copilotkit/react-core` / `react-ui` / `runtime` 均为 **1.90.2**，接入用的是 v2 API
+（`CopilotKitProvider` + `createCopilotExpressHandler`），因为 v1 的 `CopilotRuntime` 组合自 1.68.2 起已被标记弃用。
+前后端都用了 single-route 模式（前端 `useSingleEndpoint`、Runtime `mode: "single-route"`），两边必须一致。
+
+原理说明与交互图在后端仓库：`docs/day-3-agent-learning.md`、`docs/diagrams/day-3-agent-interaction.png`。
+
 ## 本地开发（不使用容器）
 
 ```bash
