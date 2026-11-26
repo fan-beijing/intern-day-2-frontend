@@ -115,8 +115,20 @@ cd intern-day-2-frontend && docker compose up -d --build
 | 容器构建 | web 与 runtime 两个 target 均构建成功 |
 | 从零复现 | 清空网络与卷后按 README 重建，全流程可复现 |
 
-> 流式与工具项是在后端仓库 `compose.mock.yaml` 的本地 Mock 模型下验证的，
-> 验证协议与链路，不代表真实模型能力。真实模型因账户额度未完成，详见后端 PR。
+### 真实模型（已通过）
+
+后端已接阿里云百炼的 OpenAI 兼容接口（`deepseek-v4.1-flash`），
+本仓库在真实模型下复验：
+
+| 检查项 | 结果 |
+| --- | --- |
+| 真实模型流式回复 | ✅ 逐字显示，Network 中响应为 `text/event-stream` |
+| 真实模型工具调用 | ✅ 问「本月花了多少」，回答「支出 180.30 元，共 2 笔」，与页面汇总一致 |
+| 真实模型多轮上下文 | ✅ 轮1「我叫阿雪，爱吃火锅」→ 轮2 准确复述 |
+| 未登录被拒 | ✅ 401，前端提示重新登录 |
+
+截图：`docs/screenshots/07-agent-real-model.png`（真实模型三轮对话）、
+`06-agent-chat.png`（Mock 链路对照）。
 
 ## 原理说明与交互图
 
@@ -128,8 +140,7 @@ cd intern-day-2-frontend && docker compose up -d --build
 
 ## 已知问题与未完成项
 
-1. **真实模型对话未完成**：后端账户余额为 0（`Insufficient Balance`），
-   需要在后端 `.env` 换有效密钥后复验。
+1. **真实模型已接通**：后端用阿里云百炼 `deepseek-v4.1-flash`，本仓库无需改动。
 2. **`host.docker.internal` 不可靠**：本机 Windows + Docker Desktop 环境下，
    容器经该地址访问宿主机时 `Authorization` 头会丢失（实测同一令牌走它 401、
    走 Docker 网关 200）。因此改用共享网络 + 服务名 `api:8000`。
