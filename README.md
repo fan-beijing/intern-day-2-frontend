@@ -146,7 +146,30 @@ cd intern-day-2-frontend && docker compose up --build -d
 | api（FastAPI） | 另一个仓库 | `http://localhost:8000` | `api:8000` | Agent 与账目接口 |
 
 web 与 runtime 在同一个 Compose 项目里，可以用服务名互访；**api 在另一个 Compose 项目**，
-所以 runtime 通过 `host.docker.internal:8000` 访问它，不假定对方服务名可解析。
+两个项目各有默认网络、互不可见，所以这里用**显式共享网络**把它们接起来：
+
+```bash
+# 只需执行一次：创建共享网络（两个仓库的 compose 都以 external 方式引用它）
+docker network create intern-day-shared
+```
+
+```bash
+# 后端仓库
+cd intern-day-2-backend && docker compose up -d --build
+
+# 前端仓库
+cd intern-day-2-frontend && docker compose up -d --build
+```
+
+共享网络里后端容器带别名 `api`，因此 runtime 用 `http://api:8000/agent` 直接访问，
+中文服务名可解析、不经过宿主机端口。
+
+> **为什么不用 `host.docker.internal`**：本机 Win + Docker Desktop 环境下，
+> 经它转发的请求会被本机代理改写，实测会出现 **Authorization 头丢失**：
+> 同一个合法令牌，走 `host.docker.internal:8000` 得到 `401`，
+> 走 Docker 网关 `172.19.0.1:8000` 得到 `200`，两者响应体完全不同。
+> 换成共享网络后 `GET /auth/me` 与 `POST /agent` 均恢复正常。
+> 这是今天排查最久的一个问题，定位方法是「同一令牌、两种网络路径，对照响应」。
 
 Vite 本身不是 Runtime：`vite.config.ts` 里只有 `proxy`，把请求转给真正的 Runtime 服务。
 
