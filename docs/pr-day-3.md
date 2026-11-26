@@ -8,6 +8,28 @@
 > 第二天的 PR 尚未合并，按任务说明第 110 行的要求，第三天 PR 暂以该分支为基础，
 > 并在下方「配套仓库」处关联第二天的 PR。
 
+## 演示材料（截图）
+
+> **需要手动上传三张图**：把下面占位行替换成真实图片。
+> 做法：删掉占位行 → 用编辑器把图片拖到这个位置（或点工具栏回形针）。
+> GitHub 会生成 `user-attachments` 地址，私有仓库下也能正常显示。
+> 不要用 raw 外链：私有仓库不可匿名访问，会显示破图。
+
+**① 聊天面板（真实模型，三轮对话）**
+
+<!-- 拖这张：D:\2026-11-15-20-13-07\intern-day-2-frontend\docs\screenshots\07-agent-real-model.png -->
+![待上传：07-agent-real-model.png]
+
+**② 聊天面板（Mock 链路对照）**
+
+<!-- 拖这张：D:\2026-11-15-20-13-07\intern-day-2-frontend\docs\screenshots\06-agent-chat.png -->
+![待上传：06-agent-chat.png]
+
+**③ 交互图**（在后端仓库 `docs/diagrams/day-3-agent-interaction.png`，
+与后端 PR 用的是同一张，这里可不重复上传）
+
+---
+
 ## 目标
 
 在第二天的 React + TypeScript 登录与记账页面上，接入 **CopilotKit** 聊天面板，
@@ -143,7 +165,6 @@ cd intern-day-2-frontend && docker compose up -d --build
 - 复盘：[`docs/day-3-retrospective.md`](https://github.com/fan-beijing/intern-day-2-backend/blob/feat/agent-chat/docs/day-3-retrospective.md)
 - 演示脚本：[`docs/day-3-demo-script.md`](https://github.com/fan-beijing/intern-day-2-backend/blob/feat/agent-chat/docs/day-3-demo-script.md)
 
-![第三天交互图](https://github.com/fan-beijing/intern-day-2-backend/raw/feat/agent-chat/docs/diagrams/day-3-agent-interaction.png)
 
 ## 设计取舍与已知限制
 
